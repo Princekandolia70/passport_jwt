@@ -3,9 +3,17 @@
 
 module.exports = (sequelize, DataTypes) => {
     const blogs = sequelize.define('blog', {
-        title: DataTypes.STRING(112),
-        content: DataTypes.TEXT,
-        image: DataTypes.TEXT
+        title: {
+            type : DataTypes.STRING(32),
+            allowNull : false
+        },
+        content: {
+            type : DataTypes.TEXT,
+            allowNull : false
+        },
+        image: {
+            type : DataTypes.TEXT
+        },
     })
     module.exports = blogs
 }

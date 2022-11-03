@@ -25,11 +25,6 @@ db.sequelize = sequelize
 
 //Now we need to sync user model in database we use
 
-db.sequelize.sync({ force: false })  // if force is true then it will drop table with values and create it again 
-    .then(() => {
-        console.log("sync user model")
-    })
-
-db.users = require('./models/blog')(sequelize, DataTypes)
+db.blogs = require('./models/blog')(sequelize, DataTypes)
 module.exports = db;
 

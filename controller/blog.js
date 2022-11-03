@@ -19,21 +19,23 @@ module.exports = {
           let image = file ? (file?.blogImage ? file.blogImage[0].filename || null : null) : null
           const { title, content } = req.body;
 
-          // if (!title || !content) {
-          //   return res.status(400).json({
-          //     success: false,
-          //     status: 400,
-          //     message: "Some required fields are missing, please check",
-          //   });
-          // }
+          var checkField = []
 
-          // if (!req.files.length) {
-          //     return res.status(400).json({
-          //         success: false,
-          //         status: 400,
-          //         message: "Some image related fields are required",
-          //     });
-          // }
+          if (!title) {
+            checkField.push("title")
+          }
+
+          if (!content) {
+            checkField.push("content")
+          }
+
+          if (checkField.length > 0) {
+            return res.status(400).json({
+              success: false,
+              status: 400,
+              message: `Required field ${checkField} are missing, please check`,
+            });
+          }
 
           const blogs = await Blogs.create({
             title,
@@ -76,9 +78,8 @@ module.exports = {
   getBlogs: async (req, res, next) => {
     try {
       const data = await Blogs.findAll();
-
       if (!data.length) {
-        
+
         return res.status(404).json({
           success: false,
           status: 404,
@@ -129,21 +130,23 @@ module.exports = {
             });
           }
 
-          // if (!title || !content) {
-          //   return res.status(400).json({
-          //     success: false,
-          //     status: 400,
-          //     message: "Some required fields are missing, please check",
-          //   });
-          // }
+          var checkField = []
 
-          // if (!req.files.length) {
-          //     return res.status(400).json({
-          //         success: false,
-          //         status: 400,
-          //         message: "Some image related fields are required",
-          //     });
-          // }
+          if (!title) {
+            checkField.push("title")
+          }
+
+          if (!content) {
+            checkField.push("content")
+          }
+
+          if (checkField.length > 0) {
+            return res.status(400).json({
+              success: false,
+              status: 400,
+              message: `Required field ${checkField} are missing, please check`,
+            });
+          }
 
           const blogs = await Blogs.update({ title, content, image: image },
             {

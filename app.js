@@ -6,8 +6,19 @@ const app = express()
 var bodyParser = require('body-parser')
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json());
-const yup = require('yup')
 const logger = require('./logger')
+const passport = require('./passportConfig');
+const session = require('express-session')
+const middleware = require('./middleware')
+const schema = require('./schema/schema')
+
+app.use(session({
+	resave: false,
+	saveUninitialized: true,
+	secret: 'abcdefedsdssdsd'
+}));
+
+app.use(passport.initialize());
 
 const PORT = process.env.PORT || 8000
 
@@ -20,35 +31,31 @@ function listenServer() {
 	});
 }
 
-const schema = yup.object({
-	body: yup.object({
-		title: yup.string().required(),
-		content: yup.string().required(),
-		blogImage: yup.string().optional()
-	})
-});
-
-const validation = (schema) => async (req, res, next) => {
-	try {
-		await schema.validate({
-			body: req.body,
-			query: req.query,
-			params: req.params,
-		});
-		return next();
-	} catch (err) {
-		return res.status(500).json({ type: err.name, message: err.message });
-	}
-};
-
 var blog = require('./controller/blog');
 
-// routes of api
+// route for google authentication
+app.get(
+	"/auth/google",
+	passport.authenticate("google", { scope: ["email", "profile"] })
+);
 
-app.get("/getblogs", blog.getBlogs)
+app.get(
+	"/auth/google/callback",
+	passport.authenticate('google', { session: false, scope: ['profile', 'email'] }),
+	(req, res) => {
+		res.redirect("/profile/");
+	}
+);
+app.get("/profile", (req, res) => {
+	res.send("Welcome , user login successfully");
+});
 
-app.post("/addblogs", validation(schema), blog.addBlogs)
 
-app.put("/updateblogs/:id", blog.updateBlogs)
+// route for api
+app.get("/getblogs", middleware.isSignedIn, blog.getBlogs)
 
-app.delete("/deleteblogs/:id", blog.deleteBlogs)
+app.post("/addblogs", middleware.isSignedIn, blog.addBlogs)
+
+app.put("/updateblogs/:id", middleware.isSignedIn, middleware.validation(schema.updateSchema), blog.updateBlogs)
+
+app.delete("/deleteblogs/:id", middleware.isSignedIn, middleware.validation(schema.deleteSchema), blog.deleteBlogs)
